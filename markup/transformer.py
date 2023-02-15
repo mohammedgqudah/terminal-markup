@@ -1,6 +1,8 @@
 from functools import reduce
 from lark import Transformer, v_args
+from collections import namedtuple
 
+CallableAttribute = namedtuple('CallableAttribute', ['attribute', 'callable'])
 
 @v_args(inline=True)
 class MarkupToList(Transformer):
@@ -32,7 +34,7 @@ class MarkupToList(Transformer):
         return {
             'component': opening,
             'children': body,
-            'attributes': attributes
+            **attributes
         }
 
     def self_closing_element(self, opening):
@@ -41,8 +43,17 @@ class MarkupToList(Transformer):
             'children': None
         }
 
-    def attribute(self, *attrs):
-        return tuple(attrs)
+    def raw_attribute(self, name, value):
+        return name, value
+
+    def callable_attribute(self, name, _callable):
+        return CallableAttribute(name, _callable)
 
     def attributes(self, *attrs):
-        return dict(attrs)
+        # TODO: partition list, or rewrite the grammar to automatically separate
+        callable_attributes = (attr for attr in attrs if isinstance(attr, CallableAttribute))
+        raw_attributes = (attr for attr in attrs if not isinstance(attr, CallableAttribute))
+        return {
+            'attributes': dict(raw_attributes),
+            'callable_attributes': dict(callable_attributes)
+        }

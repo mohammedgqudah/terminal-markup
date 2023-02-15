@@ -12,7 +12,8 @@ def test_it_transforms_a_single_component():
             'attribute': None
         },
         'children': [],
-        'attributes': {}
+        'attributes': {},
+        'callable_attributes': {}
     }]
 
     markup = '<Button>"click me"</Button>'
@@ -24,7 +25,8 @@ def test_it_transforms_a_single_component():
             'attribute': None
         },
         'children': ['click me'],
-        'attributes': {}
+        'attributes': {},
+        'callable_attributes': {}
     }]
 
 
@@ -39,7 +41,8 @@ def test_it_transforms_attributes():
             'attribute': None
         },
         'children': ['click me'],
-        'attributes': {'classes': 'success'}
+        'attributes': {'classes': 'success'},
+        'callable_attributes': {}
     }]
 
     markup = '<Button classes="success" id="primary-btn">"click me"</Button>'
@@ -54,5 +57,27 @@ def test_it_transforms_attributes():
         'attributes': {
             'classes': 'success',
             'id': 'primary-btn'
+        },
+        'callable_attributes': {}
+    }]
+
+
+def test_it_transforms_callable_attributes():
+    markup = '<Button @click=myapp.functions:onclick>"click me"</Button>'
+
+    _list = MarkupToList().transform(parser.parse(markup))
+
+    assert _list == [{
+        'component': {
+            'module': 'Button',
+            'attribute': None
+        },
+        'children': ['click me'],
+        'attributes': {},
+        'callable_attributes': {
+            'click': {
+                'module': 'myapp.functions',
+                'attribute': 'onclick'
+            }
         }
     }]
