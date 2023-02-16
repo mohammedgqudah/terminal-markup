@@ -37,10 +37,13 @@ class MarkupToList(Transformer):
             **attributes
         }
 
-    def self_closing_element(self, opening):
+    def self_closing_element(self, opening, attributes=None):
+        attributes = attributes or {}
+
         return {
             'component': opening,
-            'children': None
+            'children': None,
+            **attributes
         }
 
     def raw_attribute(self, name, value):

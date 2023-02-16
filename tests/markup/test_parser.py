@@ -1,16 +1,4 @@
-import pytest
-
 from markup.parser import parser
-from markup.transformer import MarkupToList
-
-test = '''
-    <textual.widgets.Button/>
-    <Footer/>
-    <Container>
-        <Button>"ayayay"</Button>
-        <Button>"ayayay"</Button>
-    </Container>
-    '''
 
 
 def test_it_parses_a_single_empty_full_element():
