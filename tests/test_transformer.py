@@ -1,3 +1,4 @@
+import pytest
 from textual.widgets import Button, Footer
 from textual.containers import Container
 
@@ -153,7 +154,7 @@ def test_it_parses_nested_elements_attributes():
     ]
 
 
-def test_it_transforms_an_import_path():
+def test_it_transforms_an_aliased_import_path():
     markup = '<widgets:Button></widgets:Button>'
     _list = MarkupToList().transform(parser.parse(markup))
 
@@ -162,4 +163,32 @@ def test_it_transforms_an_import_path():
         'children': [],
         'attributes': {},
         'callable_attributes': {}
+    }]
+
+
+def test_it_transforms_absolute_import_paths():
+    markup = '<$textual.widgets:Button>"click me"</textual.widgets:Button>'
+    _list = MarkupToList().transform(parser.parse(markup))
+
+    assert _list == [{
+        'component': Button,
+        'children': ['click me'],
+        'attributes': {},
+        'callable_attributes': {}
+    }]
+
+    with pytest.raises(Exception, match="No module named 'widgets'"):
+        markup = '<$widgets:Button>"click me"</widgets:Button>'
+        _list = MarkupToList().transform(parser.parse(markup))
+
+    markup = '<$textual.widgets:Button @click=$utils.importer:import_string>"click me"</textual.widgets:Button>'
+    _list = MarkupToList().transform(parser.parse(markup))
+
+    assert _list == [{
+        'component': Button,
+        'children': ['click me'],
+        'attributes': {},
+        'callable_attributes': {
+            'click': import_string
+        }
     }]

@@ -21,6 +21,7 @@ atom: ESCAPED_STRING
     | dotted_name "." CNAME
 
 import_path: dotted_name [":" dotted_name]
+    | "$" dotted_name ":" dotted_name -> import_absolute_path
 
 // TAGS
 // ====

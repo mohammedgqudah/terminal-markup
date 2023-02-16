@@ -25,6 +25,9 @@ class MarkupToList(Transformer):
     def import_path(self, module, attribute):
         return import_component(module, attribute)
 
+    def import_absolute_path(self, module, attribute):
+        return import_component(module, attribute, use_alias=False)
+
     def start(self, *args):
         return list(args)
 
