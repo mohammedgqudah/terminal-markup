@@ -1,5 +1,10 @@
+from textual.widgets import Button, Footer
+from textual.containers import Container
+
 from markup.transformer import MarkupToList
 from markup.parser import parser
+
+from utils.importer import import_string, import_aliased_string
 
 
 def test_it_transforms_a_single_component():
@@ -7,10 +12,7 @@ def test_it_transforms_a_single_component():
     _list = MarkupToList().transform(parser.parse(markup))
 
     assert _list == [{
-        'component': {
-            'module': 'Button',
-            'attribute': None
-        },
+        'component': Button,
         'children': [],
         'attributes': {},
         'callable_attributes': {}
@@ -20,10 +22,7 @@ def test_it_transforms_a_single_component():
     _list = MarkupToList().transform(parser.parse(markup))
 
     assert _list == [{
-        'component': {
-            'module': 'Button',
-            'attribute': None
-        },
+        'component': Button,
         'children': ['click me'],
         'attributes': {},
         'callable_attributes': {}
@@ -36,10 +35,7 @@ def test_it_transforms_attributes():
     _list = MarkupToList().transform(parser.parse(markup))
 
     assert _list == [{
-        'component': {
-            'module': 'Button',
-            'attribute': None
-        },
+        'component': Button,
         'children': ['click me'],
         'attributes': {'classes': 'success'},
         'callable_attributes': {}
@@ -49,10 +45,7 @@ def test_it_transforms_attributes():
     _list = MarkupToList().transform(parser.parse(markup))
 
     assert _list == [{
-        'component': {
-            'module': 'Button',
-            'attribute': None
-        },
+        'component': Button,
         'children': ['click me'],
         'attributes': {
             'classes': 'success',
@@ -63,62 +56,44 @@ def test_it_transforms_attributes():
 
 
 def test_it_transforms_callable_attributes():
-    markup = '<Button @click=myapp.functions:onclick>"click me"</Button>'
+    markup = '<Button @click=utils.importer:import_string>"click me"</Button>'
 
     _list = MarkupToList().transform(parser.parse(markup))
 
     assert _list == [{
-        'component': {
-            'module': 'Button',
-            'attribute': None
-        },
+        'component': Button,
         'children': ['click me'],
         'attributes': {},
         'callable_attributes': {
-            'click': {
-                'module': 'myapp.functions',
-                'attribute': 'onclick'
-            }
+            'click': import_string
         }
     }]
 
 
 def test_it_transforms_callable_attributes_in_a_self_closing_attribute():
-    markup = '<Button @click=myapp.functions:onclick/>'
+    markup = '<Button @click=utils.importer:import_string/>'
     _list = MarkupToList().transform(parser.parse(markup))
 
     assert _list == [{
-        'component': {
-            'module': 'Button',
-            'attribute': None
-        },
+        'component': Button,
         'children': None,
         'attributes': {},
         'callable_attributes': {
-            'click': {
-                'module': 'myapp.functions',
-                'attribute': 'onclick'
-            }
+            'click': import_string
         }
     }]
 
-    markup = '<Button @click=myapp.functions:onclick classes="success"/>'
+    markup = '<Button @click=utils.importer:import_string classes="success"/>'
     _list = MarkupToList().transform(parser.parse(markup))
 
     assert _list == [{
-        'component': {
-            'module': 'Button',
-            'attribute': None
-        },
+        'component': Button,
         'children': None,
         'attributes': {
             'classes': 'success'
         },
         'callable_attributes': {
-            'click': {
-                'module': 'myapp.functions',
-                'attribute': 'onclick'
-            }
+            'click': import_string
         }
     }]
 
@@ -127,8 +102,8 @@ def test_it_parses_nested_elements_attributes():
     markup = '''
         <textual.widgets:Button/>
         <Footer/>
-        <Container @click=module:func1>
-            <textual.widgets:Button classes="success" @click=module:func2>"activate"</textual.widgets:Button>
+        <Container @click=utils.importer:import_string>
+            <textual.widgets:Button classes="success" @click=utils.importer:import_aliased_string>"activate"</textual.widgets:Button>
             <textual.widgets:Button classes="failure">"delete"</textual.widgets:Button>
         </Container>
     '''
@@ -137,50 +112,32 @@ def test_it_parses_nested_elements_attributes():
 
     assert _list == [
         {
-            'component': {
-                'module': 'textual.widgets',
-                'attribute': 'Button'
-            },
+            'component': Button,
             'children': None,
             'attributes': {},
             'callable_attributes': {}
         },
         {
-            'component': {
-                'module': 'Footer',
-                'attribute': None
-            },
+            'component': Footer,
             'children': None,
             'attributes': {},
             'callable_attributes': {}
         },
         {
-            'component': {
-                'module': 'Container',
-                'attribute': None
-            },
+            'component': Container,
             'children': [
                 {
-                    'component': {
-                        'module': 'textual.widgets',
-                        'attribute': 'Button'
-                    },
+                    'component': Button,
                     'children': ["activate"],
                     'attributes': {
                         'classes': "success"
                     },
                     'callable_attributes': {
-                        'click': {
-                            'module': 'module',
-                            'attribute': 'func2'
-                        }
+                        'click': import_aliased_string
                     }
                 },
                 {
-                    'component': {
-                        'module': 'textual.widgets',
-                        'attribute': 'Button'
-                    },
+                    'component': Button,
                     'children': ["delete"],
                     'attributes': {
                         'classes': "failure"
@@ -190,10 +147,19 @@ def test_it_parses_nested_elements_attributes():
             ],
             'attributes': {},
             'callable_attributes': {
-                'click': {
-                    'module': 'module',
-                    'attribute': 'func1'
-                }
+                'click': import_string
             }
         }
     ]
+
+
+def test_it_transforms_an_import_path():
+    markup = '<widgets:Button></widgets:Button>'
+    _list = MarkupToList().transform(parser.parse(markup))
+
+    assert _list == [{
+        'component': Button,
+        'children': [],
+        'attributes': {},
+        'callable_attributes': {}
+    }]

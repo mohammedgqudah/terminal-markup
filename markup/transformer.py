@@ -1,8 +1,11 @@
-from functools import reduce
 from lark import Transformer, v_args
+
 from collections import namedtuple
 
+from markup.components import import_component
+
 CallableAttribute = namedtuple('CallableAttribute', ['attribute', 'callable'])
+
 
 @v_args(inline=True)
 class MarkupToList(Transformer):
@@ -20,10 +23,7 @@ class MarkupToList(Transformer):
         return f"{left}.{right}"
 
     def import_path(self, module, attribute):
-        return {
-            'module': module,
-            'attribute': str(attribute) if attribute else None
-        }
+        return import_component(module, attribute)
 
     def start(self, *args):
         return list(args)
