@@ -1,6 +1,10 @@
 from lark import Transformer, v_args
+from textual.widget import Widget
 
+import inspect
 from collections import namedtuple
+from typing import Any
+
 
 from markup.components import import_component
 
@@ -24,6 +28,13 @@ class MarkupToList(Transformer):
 
     def import_path(self, module, attribute):
         return import_component(module, attribute)
+
+    def component(self, _object: Any):
+        if not inspect.isclass(_object):
+            raise Exception(f"A component must be a class, got: {_object}")
+        if not issubclass(_object, Widget):
+            raise Exception(f"A component must be of type {Widget}, got: {_object}")
+        return _object
 
     def import_absolute_path(self, module, attribute):
         return import_component(module, attribute, use_alias=False)

@@ -1,10 +1,10 @@
 import pytest
 from textual.widgets import Button, Footer
+from textual.widget import Widget
 from textual.containers import Container
 
 from markup.transformer import MarkupToList
 from markup.parser import parser
-
 from utils.importer import import_string, import_aliased_string
 
 
@@ -204,3 +204,19 @@ def test_it_transforms_absolute_import_paths():
             'click': import_string
         }
     }]
+
+
+def test_it_raises_an_exception_if_the_importable_attribute_is_not_a_class():
+    from datetime import MINYEAR
+
+    with pytest.raises(Exception, match=f"A component must be a class, got: {MINYEAR}"):
+        markup = '<datetime:MINYEAR/>'
+        _list = MarkupToList().transform(parser.parse(markup))
+
+
+def test_it_raises_an_exception_if_the_importable_attribute_is_not_a_widget():
+    from datetime import datetime
+
+    with pytest.raises(Exception, match=f"A component must be of type {Widget}, got: {datetime}"):
+        markup = '<datetime:datetime/>'
+        _list = MarkupToList().transform(parser.parse(markup))

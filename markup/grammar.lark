@@ -7,7 +7,7 @@ start: element+
 // ELEMENTS
 // ========
 full_element: _op_tag element_body _cl_tag
-self_closing_element: "<" import_path attributes "/>"
+self_closing_element: "<" component attributes "/>"
 
 element_body: (element | atom)*
 
@@ -23,10 +23,12 @@ atom: ESCAPED_STRING
 import_path: dotted_name [":" dotted_name]
     | "$" dotted_name ":" dotted_name -> import_absolute_path
 
+component: import_path
+
 // TAGS
 // ====
-_op_tag: "<" import_path attributes">"
-_cl_tag: "</" import_path ">"
+_op_tag: "<" component attributes">"
+_cl_tag: "</" component ">"
 
 // ATTRIBUTES
 // ==========
