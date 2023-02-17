@@ -16,7 +16,7 @@ def test_it_transforms_a_single_component():
         'component': Button,
         'children': [],
         'attributes': {},
-        'callable_attributes': {}
+        'importable_attributes': {}
     }]
 
     markup = '<Button>"click me"</Button>'
@@ -26,7 +26,7 @@ def test_it_transforms_a_single_component():
         'component': Button,
         'children': ['click me'],
         'attributes': {},
-        'callable_attributes': {}
+        'importable_attributes': {}
     }]
 
 
@@ -39,7 +39,7 @@ def test_it_transforms_attributes():
         'component': Button,
         'children': ['click me'],
         'attributes': {'classes': 'success'},
-        'callable_attributes': {}
+        'importable_attributes': {}
     }]
 
     markup = '<Button classes="success" id="primary-btn">"click me"</Button>'
@@ -52,11 +52,11 @@ def test_it_transforms_attributes():
             'classes': 'success',
             'id': 'primary-btn'
         },
-        'callable_attributes': {}
+        'importable_attributes': {}
     }]
 
 
-def test_it_transforms_callable_attributes():
+def test_it_transforms_importable_attributes():
     markup = '<Button @click=utils.importer:import_string>"click me"</Button>'
     _list = MarkupToList().transform(parser.parse(markup))
 
@@ -64,7 +64,7 @@ def test_it_transforms_callable_attributes():
         'component': Button,
         'children': ['click me'],
         'attributes': {},
-        'callable_attributes': {
+        'importable_attributes': {
             'click': import_string
         }
     }]
@@ -76,14 +76,14 @@ def test_it_transforms_callable_attributes():
         'component': Button,
         'children': ['click me'],
         'attributes': {},
-        'callable_attributes': {
+        'importable_attributes': {
             'click': import_string,
             'mount': import_string,
         }
     }]
 
 
-def test_it_transforms_callable_attributes_in_a_self_closing_attribute():
+def test_it_transforms_importable_attributes_in_a_self_closing_attribute():
     markup = '<Button @click=utils.importer:import_string/>'
     _list = MarkupToList().transform(parser.parse(markup))
 
@@ -91,7 +91,7 @@ def test_it_transforms_callable_attributes_in_a_self_closing_attribute():
         'component': Button,
         'children': None,
         'attributes': {},
-        'callable_attributes': {
+        'importable_attributes': {
             'click': import_string
         }
     }]
@@ -105,7 +105,7 @@ def test_it_transforms_callable_attributes_in_a_self_closing_attribute():
         'attributes': {
             'classes': 'success'
         },
-        'callable_attributes': {
+        'importable_attributes': {
             'click': import_string
         }
     }]
@@ -128,13 +128,13 @@ def test_it_parses_nested_elements_attributes():
             'component': Button,
             'children': None,
             'attributes': {},
-            'callable_attributes': {}
+            'importable_attributes': {}
         },
         {
             'component': Footer,
             'children': None,
             'attributes': {},
-            'callable_attributes': {}
+            'importable_attributes': {}
         },
         {
             'component': Container,
@@ -145,7 +145,7 @@ def test_it_parses_nested_elements_attributes():
                     'attributes': {
                         'classes': "success"
                     },
-                    'callable_attributes': {
+                    'importable_attributes': {
                         'click': import_aliased_string
                     }
                 },
@@ -155,11 +155,11 @@ def test_it_parses_nested_elements_attributes():
                     'attributes': {
                         'classes': "failure"
                     },
-                    'callable_attributes': {}
+                    'importable_attributes': {}
                 },
             ],
             'attributes': {},
-            'callable_attributes': {
+            'importable_attributes': {
                 'click': import_string
             }
         }
@@ -174,7 +174,7 @@ def test_it_transforms_an_aliased_import_path():
         'component': Button,
         'children': [],
         'attributes': {},
-        'callable_attributes': {}
+        'importable_attributes': {}
     }]
 
 
@@ -186,7 +186,7 @@ def test_it_transforms_absolute_import_paths():
         'component': Button,
         'children': ['click me'],
         'attributes': {},
-        'callable_attributes': {}
+        'importable_attributes': {}
     }]
 
     with pytest.raises(Exception, match="No module named 'widgets'"):
@@ -200,7 +200,7 @@ def test_it_transforms_absolute_import_paths():
         'component': Button,
         'children': ['click me'],
         'attributes': {},
-        'callable_attributes': {
+        'importable_attributes': {
             'click': import_string
         }
     }]

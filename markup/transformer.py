@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from markup.components import import_component
 
-CallableAttribute = namedtuple('CallableAttribute', ['attribute', 'callable'])
+ImportableAttribute = namedtuple('ImportableAttribute', ['attribute', 'importable'])
 
 
 @v_args(inline=True)
@@ -52,14 +52,14 @@ class MarkupToList(Transformer):
     def raw_attribute(self, name, value):
         return name, value
 
-    def callable_attribute(self, name, _callable):
-        return CallableAttribute(name, _callable)
+    def importable_attribute(self, name, importable):
+        return ImportableAttribute(name, importable)
 
     def attributes(self, *attrs):
         # TODO: partition list, or rewrite the grammar to automatically separate
-        callable_attributes = (attr for attr in attrs if isinstance(attr, CallableAttribute))
-        raw_attributes = (attr for attr in attrs if not isinstance(attr, CallableAttribute))
+        importable_attributes = (attr for attr in attrs if isinstance(attr, ImportableAttribute))
+        raw_attributes = (attr for attr in attrs if not isinstance(attr, ImportableAttribute))
         return {
             'attributes': dict(raw_attributes),
-            'callable_attributes': dict(callable_attributes)
+            'importable_attributes': dict(importable_attributes)
         }

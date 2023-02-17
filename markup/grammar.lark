@@ -30,9 +30,9 @@ _cl_tag: "</" import_path ">"
 
 // ATTRIBUTES
 // ==========
-attributes: (raw_attribute | callable_attribute)*
+attributes: (raw_attribute | importable_attribute)*
 ?raw_attribute: CNAME "=" attribute_value
-?callable_attribute: "@" CNAME "=" import_path
+?importable_attribute: "@" CNAME "=" import_path
 
 ?attribute_value: atom
 
