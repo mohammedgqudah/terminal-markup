@@ -58,7 +58,6 @@ def test_it_transforms_attributes():
 
 def test_it_transforms_callable_attributes():
     markup = '<Button @click=utils.importer:import_string>"click me"</Button>'
-
     _list = MarkupToList().transform(parser.parse(markup))
 
     assert _list == [{
@@ -67,6 +66,19 @@ def test_it_transforms_callable_attributes():
         'attributes': {},
         'callable_attributes': {
             'click': import_string
+        }
+    }]
+
+    markup = '<Button @click=utils.importer:import_string @mount=utils.importer:import_string>"click me"</Button>'
+    _list = MarkupToList().transform(parser.parse(markup))
+
+    assert _list == [{
+        'component': Button,
+        'children': ['click me'],
+        'attributes': {},
+        'callable_attributes': {
+            'click': import_string,
+            'mount': import_string,
         }
     }]
 
