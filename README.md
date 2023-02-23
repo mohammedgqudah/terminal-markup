@@ -1,75 +1,26 @@
-# Terminal (Textual) Markup
-A markup language to build `Textualize\Textual` components.
+# Terminal Markup
+A markup language to build terminal interfaces, built on top of curses.
 
-> ⚠️ This project is purely an experiment and shouldn't be
-> used for normal usage.
+> ⚠️ This project is purely an experiment and is still under development
 
-
-The language grammar is defined in markup/grammar.lark
-
-
-```python
-markup = '<textual.widgets:Button classes="success" id="primary-btn">"click me"</textual.widgets:Button>'
-_list = MarkupToList().transform(parser.parse(markup))
-
-assert _list == [{
-    'component': {
-        'module': 'textual.widgets',
-        'attribute': 'Button'
-    },
-    'children': ['click me'],
-    'attributes': {
-        'classes': 'success',
-        'id': 'primary-btn'
-    }
-}]
-```
-
-Language Grammar
-```lark
-// STARTING RULES
-// ==============
-start: element+
-?element: full_element
-    | self_closing_element
-
-// ELEMENTS
-// ========
-full_element: _op_tag element_body _cl_tag
-self_closing_element: "<" import_path attributes "/>"
-
-element_body: (element | atom)*
-
-atom: ESCAPED_STRING
-    | NUMBER
-
-
-// IMPORTS
-// =======
-?dotted_name: CNAME -> str
-    | dotted_name "." CNAME
-
-import_path: dotted_name [":" dotted_name]
-
-// TAGS
-// ====
-_op_tag: "<" import_path attributes">"
-_cl_tag: "</" import_path ">"
-
-// ATTRIBUTES
-// ==========
-attributes: attribute*
-?attribute: CNAME "=" attribute_value
-    | "@" CNAME "=" import_path -> callback_attribute
-
-?attribute_value: atom
-
-// LARK IMPORTS
-// ==========
-
-%import common.CNAME
-%import common.ESCAPED_STRING
-%import common.WS
-%import common.NUMBER
-%ignore WS
-```
+## TODO
+- [ ] unit/feature testing by dumping curses stdout
+- [ ] scrolling
+  - [ ] case: parent static max height is 50, child static uses more than 50 lines
+- [ ] layout/styles
+  - [x] nesting `Statics`
+  - [x] auto calculating position and height
+  - [ ] flex box
+  - [ ] max height
+  - [ ] max width
+  - [ ] min width
+  - [ ] min height
+  - [ ] display: inline
+  - [ ] units (%, cell, line)
+  - [ ] CSS parser
+- [ ] components
+  - [ ] options
+  - [ ] text input
+  - [ ] button
+- [ ] detect mouse input
+  - [ ] detect which component was clicked based on cords (focus)
