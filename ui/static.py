@@ -82,6 +82,3 @@ class Static(Renderable):
 
     def __repr__(self):
         return f"Static(id={self.id}, children={self.children})"
-
-    def __debug_repr__(self):
-        return f"Static(id={self.id}, position={self.position}, dimensions={self.get_height_and_width()})"
