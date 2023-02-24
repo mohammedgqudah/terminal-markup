@@ -1,3 +1,4 @@
+import typing
 from enum import Enum
 from dataclasses import dataclass
 
@@ -8,12 +9,24 @@ class DisplayType(Enum):
     INLINE_BLOCK = 3
 
 
+class OverflowType(Enum):
+    HIDDEN = 1
+    SCROLL = 2
+
+
 @dataclass
 class Display:
     type: DisplayType
 
 
+@dataclass
 class Styles:
-    def __init__(self):
-        self.display: Display = Display(type=DisplayType.INLINE_BLOCK)
-        
+    display: Display = Display(type=DisplayType.INLINE_BLOCK)
+    max_height: typing.Optional[int] = None
+    min_height: typing.Optional[int] = None
+    max_width: typing.Optional[int] = None
+    min_width: typing.Optional[int] = None
+    overflow: OverflowType = OverflowType.SCROLL
+
+    def get(self, key, default=None):
+        return getattr(self, key) or default
