@@ -1,5 +1,5 @@
 from ui.geometry import get_text_height_and_width, Dimensions, Point
-from ui.interfaces.renderable import Renderable
+from ui.renderable import Renderable
 
 
 class Text(Renderable):

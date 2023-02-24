@@ -6,7 +6,7 @@ from itertools import cycle
 import curses
 
 from .geometry import Dimensions, Point
-from ui.interfaces.renderable import Renderable
+from ui.renderable import Renderable
 
 COLOR_GREY = 10
 
