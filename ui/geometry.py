@@ -30,5 +30,6 @@ def get_text_height_and_width(text: str) -> Dimensions:
     :param text:
     :return:
     """
-    lines = text.split('\n')
+    # TODO: does `expandtabs` respect terminal size
+    lines = text.expandtabs().split('\n')
     return Dimensions(len(lines), max([wcswidth(line) for line in lines]))

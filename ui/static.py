@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 import logging
 import random
 from itertools import cycle
@@ -6,8 +6,7 @@ from itertools import cycle
 import curses
 
 from .geometry import Dimensions, Point
-from .plane_interface import PlaneInterface
-from .renderable_interface import RenderableInterface
+from ui.interfaces.renderable import Renderable
 
 COLOR_GREY = 10
 
@@ -22,23 +21,27 @@ colors = [
 colors = cycle(random.sample(colors, 4))
 
 
-class Static(PlaneInterface):
-    def __init__(self, children: List[Union[PlaneInterface, RenderableInterface]], id: str = None):
-        self.screen = None
-        self.parent = None
+class Static(Renderable):
+    """
+    A Static is a container that can render a list of renderable children
+    including other Statics.
+    """
+    def __init__(
+            self,
+            children: List[Renderable],
+            id: str = None
+    ):
         self.children = children
-        self.position = None
-        self.window = None
         self.id = id
+        self.window = None
 
-    def render(self, point: Point):
-        # I have to refresh the parent window before adding more windows
+    def render(self, position: Point):
         self.parent.window.refresh()
 
-        self.position = point
+        self.position = position
         self.window = curses.newwin(*self.get_height_and_width(), *self.position)
 
-        logging.debug(f"rendering: {self}")
+        logging.debug(f"window created for {self.__debug_repr__()}")
 
         # --- TEMP ---
         c = next(colors)
@@ -46,21 +49,27 @@ class Static(PlaneInterface):
         self.window.bkgd(curses.color_pair(c[0]))
         # --- TEMP ---
 
-        last_height = 0
-        for child in self.children:
-            y = last_height
+        current_line = 0
 
-            logging.debug(f"y={y}")
+        for child in self.children:
+            child_y = current_line
+            logging.debug(f"\trendering child {child.__debug_repr__()} at Y={child_y}")
 
             child.screen = self.screen
             child.parent = self
 
             if type(child) is Static:
-                logging.debug(f"static found {child}, y={y+child.parent.position.y}")
-                y += child.parent.position.y
+                # Static windows position is relevant to the main screen and not the parent
+                # to simulate rendering a static within another static, child Y will be
+                # increased by the parent Y position.
+                logging.debug(f"child is a Static. Y={child_y+child.parent.position.y}")
+                child_y += child.parent.position.y
 
-            child.render(Point(y, 0))
-            last_height += child.get_height_and_width().height
+            child.render(Point(child_y, 0))
+
+            # increment current_line by the current child height
+            # so the next child gets rendered under it.
+            current_line += child.get_height_and_width().height
 
         self.window.refresh()
 
@@ -72,4 +81,7 @@ class Static(PlaneInterface):
         return Dimensions(height, width)
 
     def __repr__(self):
+        return f"Static(id={self.id}, children={self.children})"
+
+    def __debug_repr__(self):
         return f"Static(id={self.id}, position={self.position}, dimensions={self.get_height_and_width()})"
