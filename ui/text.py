@@ -19,4 +19,4 @@ class Text(Renderable):
         self.parent.window.addstr(*point, self.text)
 
     def __repr__(self):
-        return f"Text(text={self.text})"
+        return f"{__class__.__name__}(text={self.text})"

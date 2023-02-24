@@ -20,6 +20,14 @@ class Display:
 
 
 @dataclass
+class Padding:
+    top: int = 0
+    bottom: int = 0
+    left: int = 0
+    right: int = 0
+
+
+@dataclass
 class Styles:
     display: Display = Display(type=DisplayType.INLINE_BLOCK)
     max_height: typing.Optional[int] = None
@@ -27,6 +35,7 @@ class Styles:
     max_width: typing.Optional[int] = None
     min_width: typing.Optional[int] = None
     overflow: OverflowType = OverflowType.SCROLL
+    padding: Padding = Padding()
 
     def get(self, key, default=None):
         return getattr(self, key) or default

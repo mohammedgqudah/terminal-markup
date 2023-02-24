@@ -35,4 +35,4 @@ class Renderable(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     def __debug_repr__(self):
-        return f"{__class__.__name__}(id={self.id}, position={self.position}, dimensions={self.get_height_and_width()})"
+        return f"{self.__class__.__name__}(id={self.id}, position={self.position}, dimensions={self.get_height_and_width()})"

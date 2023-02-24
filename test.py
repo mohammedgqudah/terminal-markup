@@ -1,9 +1,10 @@
 import curses
 
-
 from ui.screen import Screen
 from ui.static import Static
 from ui.text import Text
+from ui.styles import Styles, Padding
+from ui.button import Button
 
 import argparse
 import logging
@@ -18,23 +19,30 @@ if args.verbose:
 
 
 def main(std_scr):
-    curses.init_color(10, 153,255,51)
+    curses.init_color(10, 153, 255, 51)
 
     screen = Screen(std_scr).append(
         Static([
             Text("1"),
             Text("2"),
+            Button(
+                "click me! ↗",
+                # styles=Styles(padding=Padding(top=0, bottom=0, right=1, left=1))
+            ),
             Static([
-                Text("I'm nested"),
+                Text("Ayo")
+            ]),
+            Static([
+                Text("\tI'm nested"),
                 Static([
-                    Text("more nesting\ntest"),
+                    Text("\t\tmore nesting\ntest"),
                     Static([
-                        Text("AAAH!"),
-                        Text("AY!"),
+                        Text("\t\t\tAAAH!"),
+                        Text("\t\t\tAY!"),
                     ])
-                ])
-            ], id='second-static')
-        ], id='main-static')
+                ], styles=Styles(min_width=40))
+            ], id='second-static', styles=Styles(min_height=20, min_width=60))
+        ], id='main-static', styles=Styles(min_height=20, min_width=80))
     )
 
     screen.render()
