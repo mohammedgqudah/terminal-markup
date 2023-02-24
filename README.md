@@ -4,6 +4,7 @@ A markup language to build terminal interfaces, built on top of curses.
 > ⚠️ This project is purely an experiment and is still under development
 
 ## TODO
+- [x] debug mode
 - [ ] unit/feature testing by dumping curses stdout
 - [ ] scrolling
   - [ ] case: parent static max height is 50, child static uses more than 50 lines
@@ -13,8 +14,8 @@ A markup language to build terminal interfaces, built on top of curses.
   - [ ] flex box
   - [ ] max height
   - [ ] max width
-  - [ ] min width
-  - [ ] min height
+  - [x] min width
+  - [x] min height
   - [ ] display: inline
   - [ ] units (%, cell, line)
   - [ ] CSS parser

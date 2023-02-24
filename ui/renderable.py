@@ -1,11 +1,11 @@
 import abc
 import typing
-
-from ui.geometry import Dimensions, Point
-
 if typing.TYPE_CHECKING:
     from ui.screen import Screen
     from ui.static import Static
+
+from .geometry import Dimensions, Point
+from .styles import Styles
 
 
 class Renderable(metaclass=abc.ABCMeta):
@@ -14,6 +14,7 @@ class Renderable(metaclass=abc.ABCMeta):
     dimensions: typing.Optional[Dimensions] = None
     screen: typing.Optional['Screen'] = None
     parent: typing.Optional[typing.Union['Screen', 'Static']] = None
+    styles: Styles = Styles()
 
     @classmethod
     def __subclasshook__(cls, subclass):

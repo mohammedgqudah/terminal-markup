@@ -1,4 +1,4 @@
-from typing import List
+import typing
 import logging
 import random
 from itertools import cycle
@@ -6,7 +6,8 @@ from itertools import cycle
 import curses
 
 from .geometry import Dimensions, Point
-from ui.renderable import Renderable
+from .renderable import Renderable
+from .styles import Styles
 
 COLOR_GREY = 10
 
@@ -28,12 +29,14 @@ class Static(Renderable):
     """
     def __init__(
             self,
-            children: List[Renderable],
-            id: str = None
+            children: typing.List[Renderable],
+            id: str = None,
+            styles: typing.Optional[Styles] = None
     ):
         self.children = children
         self.id = id
         self.window = None
+        self.styles = styles or self.styles
 
     def render(self, position: Point):
         self.parent.window.refresh()
@@ -71,12 +74,29 @@ class Static(Renderable):
             # so the next child gets rendered under it.
             current_line += child.get_height_and_width().height
 
+        self.debug_dimensions()
+
         self.window.refresh()
 
+    def debug_dimensions(self):
+        height, width = self.get_height_and_width()
+        label = f"{width}x{height}"
+        if (width - 1) - len(label) < 0:
+            return
+
+        self.window.addstr(
+            height - 1,
+            (width - 1) - len(label),
+            label,
+            curses.A_BOLD | curses.A_UNDERLINE
+        )
+
     def get_height_and_width(self) -> Dimensions:
-        [child.get_height_and_width() for child in self.children]
         height = sum([child.get_height_and_width().height for child in self.children])
         width = max([child.get_height_and_width().width for child in self.children])
+
+        height = max(height, self.styles.get('min_height', height))
+        width = max(width, self.styles.get('min_width', width))
 
         return Dimensions(height, width)
 
