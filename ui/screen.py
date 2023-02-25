@@ -2,11 +2,12 @@ from .geometry import Point
 
 
 class Screen:
-    def __init__(self, std_screen):
-        self.window = std_screen
+    def __init__(self):
+        self.window = None
         self.children = []
 
-    def render(self):
+    def render(self, std_scr):
+        self.window = std_scr
         # commit added windows/pads
         self.window.refresh()
 
