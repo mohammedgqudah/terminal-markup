@@ -7,19 +7,19 @@ import curses
 
 from .geometry import Dimensions, Point
 from .renderable import Renderable
-from .styles import Styles
+from .styles import Styles, DisplayType
 
 COLOR_GREY = 10
 
 
 colors = [
-    (1, curses.COLOR_RED),
     (3, COLOR_GREY),
+    (5, curses.COLOR_CYAN),
     (4, curses.COLOR_MAGENTA),
-    (5, curses.COLOR_CYAN)
+    (1, curses.COLOR_RED),
 ]
 
-colors = cycle(random.sample(colors, 4))
+colors = cycle(colors)
 
 
 class Static(Renderable):
@@ -53,9 +53,19 @@ class Static(Renderable):
         # --- TEMP ---
 
         current_line = 0
+        current_column = 0
+        previous_child = None
 
         for child in self.children:
+            # if the previous child was displayed inline, current child can be rendered right next to it
+            # only if it's styled to be rendered inline, otherwise, the current column will be reset
+            # and the line will increment based in the previous child height.
+            if previous_child and previous_child.styles.display.type == DisplayType.INLINE_BLOCK and child.styles.display.type != DisplayType.INLINE_BLOCK:
+                current_column = 0
+                current_line += previous_child.get_height_and_width().height
+
             child_y = current_line
+            child_x = current_column
             logging.debug(f"\trendering child {child.__debug_repr__()} at Y={child_y}")
 
             child.screen = self.screen
@@ -63,16 +73,23 @@ class Static(Renderable):
 
             if type(child) is Static:
                 # Static windows position is relevant to the main screen and not the parent
-                # to simulate rendering a static within another static, child Y will be
-                # increased by the parent Y position.
-                logging.debug(f"child is a Static. Y={child_y+child.parent.position.y}")
+                # to simulate rendering a static within another static, child XY will be
+                # increased by the parent XY (position).
+                logging.debug(f"child is Static. Y={child_y+child.parent.position.y} X={child_x+child.parent.position.x}")
                 child_y += child.parent.position.y
+                child_x += child.parent.position.x
 
-            child.render(Point(child_y, 0))
+            # if the current child is styled for inline rendering, current column will be incremented
+            # to allow the next child to also be displayed inline if it supports it.
+            # Otherwise, current_line will be incremented by the child height and current column will be reset
+            if child.styles.display.type == DisplayType.INLINE_BLOCK:
+                current_column += child.get_height_and_width().width - 1
+            else:
+                current_line += child.get_height_and_width().height
+                current_column = 0
 
-            # increment current_line by the current child height
-            # so the next child gets rendered under it.
-            current_line += child.get_height_and_width().height
+            child.render(Point(child_y, child_x))
+            previous_child = child
 
         self.debug_dimensions()
 
@@ -92,8 +109,37 @@ class Static(Renderable):
         )
 
     def get_height_and_width(self) -> Dimensions:
+        # example layout:
+        #   ------ ------
+        #   ---------------
+        # the first line consists of two inline elements
+        # both having the same width (6)
+        # and the second is a single element, width: (15)
+        # the following loop will generate this list
+        # [[True, 12], [False, 15]]
+        cumulative_line_widths = []
+
+        for child in self.children:
+            # if the current child is inline and the previous is also inline
+            # increment the previous child width
+            if cumulative_line_widths and \
+                    cumulative_line_widths[len(cumulative_line_widths) - 1][0]\
+                    and child.styles.display.type == DisplayType.INLINE_BLOCK:
+                cumulative_line_widths[len(cumulative_line_widths) - 1][1] += child.get_height_and_width().width
+                continue
+
+            # if the child is inline add its width
+            # and set the first element to True
+            # so the next iteration increases its width
+            # instead of appending a new entry
+            cumulative_line_widths.append([
+                    child.styles.display.type == DisplayType.INLINE_BLOCK,
+                    child.get_height_and_width().width
+            ])
+
+        logging.debug(f"`{self.id}`: {cumulative_line_widths}")
         height = sum([child.get_height_and_width().height for child in self.children])
-        width = max([child.get_height_and_width().width for child in self.children])
+        width = max(cumulative_line_widths, key=lambda w: w[1])[1]
 
         height = max(height, self.styles.get('min_height', height))
         width = max(width, self.styles.get('min_width', width))

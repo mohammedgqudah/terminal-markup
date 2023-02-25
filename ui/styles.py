@@ -5,8 +5,8 @@ from dataclasses import dataclass
 
 class DisplayType(Enum):
     FLEX = 1
-    INLINE = 2
-    INLINE_BLOCK = 3
+    INLINE_BLOCK = 2
+    BLOCK = 3
 
 
 class OverflowType(Enum):
@@ -29,7 +29,7 @@ class Padding:
 
 @dataclass
 class Styles:
-    display: Display = Display(type=DisplayType.INLINE_BLOCK)
+    display: Display = Display(type=DisplayType.BLOCK)
     max_height: typing.Optional[int] = None
     min_height: typing.Optional[int] = None
     max_width: typing.Optional[int] = None

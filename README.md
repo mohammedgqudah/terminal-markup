@@ -16,7 +16,7 @@ A markup language to build terminal interfaces, built on top of curses.
   - [ ] max width
   - [x] min width
   - [x] min height
-  - [ ] display: inline
+  - [x] display: inline-block
   - [ ] units (%, cell, line)
   - [ ] CSS parser
 - [ ] components
@@ -25,3 +25,7 @@ A markup language to build terminal interfaces, built on top of curses.
   - [ ] button
 - [ ] detect mouse input
   - [ ] detect which component was clicked based on cords (focus)
+
+## Known Issues
+- The auto calculated width is +1 if the Static includes inline elements.
+- Button padding doesn't work when the display is inline

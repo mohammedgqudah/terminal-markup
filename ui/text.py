@@ -1,10 +1,12 @@
-from ui.geometry import get_text_height_and_width, Dimensions, Point
-from ui.renderable import Renderable
+from .geometry import get_text_height_and_width, Dimensions, Point
+from .renderable import Renderable
+from .styles import Styles
 
 
 class Text(Renderable):
-    def __init__(self, text: str):
+    def __init__(self, text: str, styles: Styles = None):
         self.text = text
+        self.styles = styles or self.styles
 
     def get_height_and_width(self) -> Dimensions:
         y, x = get_text_height_and_width(self.text)

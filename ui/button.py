@@ -2,10 +2,14 @@ import curses
 
 from .text import Text
 from .geometry import Point, get_text_height_and_width
-from .styles import Styles
+from .styles import Styles, Padding
 
 
 class Button(Text):
+    # styles = Styles(
+    #     padding=Padding(top=1, bottom=1, left=3, right=3)
+    # )
+
     def __init__(self, label: str, id: str = None, styles: Styles = None):
         self.label = label
 
