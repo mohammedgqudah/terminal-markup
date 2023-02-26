@@ -35,7 +35,17 @@ class Styles:
     max_width: typing.Optional[int] = None
     min_width: typing.Optional[int] = None
     overflow: OverflowType = OverflowType.SCROLL
-    padding: Padding = Padding()
+    padding: typing.Optional[Padding] = None
 
     def get(self, key, default=None):
         return getattr(self, key) or default
+
+    def merge(self, styles: typing.Optional['Styles'] = None):
+        if not styles:
+            return self
+
+        for key, value in styles.__dict__.items():
+            if value:
+                setattr(self, key, value)
+
+        return self

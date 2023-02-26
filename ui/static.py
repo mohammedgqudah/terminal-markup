@@ -49,7 +49,7 @@ class Static(Renderable):
         # --- TEMP ---
         c = next(colors)
         curses.init_pair(c[0], curses.COLOR_YELLOW, c[1])
-        self.window.bkgd(curses.color_pair(c[0]))
+        # self.window.bkgd(curses.color_pair(c[0]))
         # --- TEMP ---
 
         current_line = 0
@@ -91,7 +91,7 @@ class Static(Renderable):
             child.render(Point(child_y, child_x))
             previous_child = child
 
-        self.debug_dimensions()
+        # self.debug_dimensions()
 
         self.window.refresh()
 

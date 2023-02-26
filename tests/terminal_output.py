@@ -32,3 +32,12 @@ class TerminalOutput:
             return "\n".join(self._screen.display)
 
         return self._screen.display
+
+    def line(self, text):
+        return f"{text}{' ' * (self.TERMINAL_COLS - len(text))}"
+
+    def lines(self, number):
+        return self.lines_as_string(*[self.line("") for i in range(0, number)])
+
+    def lines_as_string(self, *lines):
+        return "\n".join(lines)

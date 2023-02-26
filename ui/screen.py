@@ -2,9 +2,9 @@ from .geometry import Point
 
 
 class Screen:
-    def __init__(self):
+    def __init__(self, children: list = None):
         self.window = None
-        self.children = []
+        self.children = children or []
 
     def render(self, std_scr):
         self.window = std_scr

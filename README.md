@@ -28,4 +28,3 @@ A markup language to build terminal interfaces, built on top of curses.
 
 ## Known Issues
 - The auto calculated width is +1 if the Static includes inline elements.
-- Button padding doesn't work when the display is inline
