@@ -27,4 +27,4 @@ A markup language to build terminal interfaces, built on top of curses.
   - [ ] detect which component was clicked based on cords (focus)
 
 ## Known Issues
-- The auto calculated width is +1 if the Static includes inline elements.
+- `Text` removes the last character

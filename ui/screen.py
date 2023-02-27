@@ -1,4 +1,4 @@
-from .geometry import Point
+from .geometry import Point, Dimensions
 
 
 class Screen:
@@ -19,6 +19,11 @@ class Screen:
             last_y += child.get_height_and_width().height
 
         self.window.refresh()
+
+    def get_height_and_width(self) -> Dimensions:
+        y, x = self.window.getmaxyx()
+
+        return Dimensions(y + 1, x + 1)
 
     def append(self, *items):
         for item in items:

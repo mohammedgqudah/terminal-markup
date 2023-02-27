@@ -2,7 +2,7 @@ import abc
 import typing
 if typing.TYPE_CHECKING:
     from ui.screen import Screen
-    from ui.static import Static
+    from ui.static import Static, _LayoutPlaceholder
 
 from .geometry import Dimensions, Point
 from .styles import Styles
@@ -15,6 +15,8 @@ class Renderable(metaclass=abc.ABCMeta):
     screen: typing.Optional['Screen'] = None
     parent: typing.Optional[typing.Union['Screen', 'Static']] = None
     styles: Styles = Styles()
+
+    _layout_placeholder: '_LayoutPlaceholder' = None
 
     @classmethod
     def __subclasshook__(cls, subclass):

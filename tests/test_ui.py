@@ -43,7 +43,7 @@ class TestUI(TerminalOutput):
                 Static([Text("Testing")], styles=Styles(display=inline_display))
             ])
         )
-        assert """Hello world  Testing""" == self.output(screen=screen).strip()
+        assert """Hello world   Testing""" == self.output(screen=screen).strip()
 
         screen = Screen([
             Static([
@@ -115,4 +115,74 @@ class TestUI(TerminalOutput):
             self.line('     test'),
             self.line('     deep'),
             self.line('     down'),
+        ).strip() == self.output(screen=screen).strip()
+
+    def test_parent_height_is_correct_when_it_has_inline_elements(self):
+        inline_display = Display(type=DisplayType.INLINE_BLOCK)
+
+        screen = Screen().append(
+            Static([
+                Static([Text("Hello world")], styles=Styles(display=inline_display), id='one'),
+                Static([Text("Testing")], styles=Styles(display=inline_display), id='two'),
+                Text('--------')
+            ], id='ayo')
+        )
+        assert self.lines_as_string(
+            self.line('Hello worldTesting'),
+            self.line("--------")
+        ).strip() == self.output(screen=screen).strip()
+
+    def test_the_next_block_element_is_rendered_correctly_if_the_previous_is_inline(self):
+        inline_display = Display(type=DisplayType.INLINE_BLOCK)
+
+        screen = Screen().append(
+            Static([
+                Static([Text("Hello world\nline2\na-very-long-string-yyyyy\ntesting")],
+                       styles=Styles(display=inline_display), id='one'),
+                Static([Text("Testing")], styles=Styles(display=inline_display), id='two'),
+                Text('--------')
+            ], id='ayo')
+        )
+
+        assert self.lines_as_string(
+            self.line('Hello world            Testing'),
+            self.line("line2"),
+            self.line("a-very-long-string-yyyy"),
+            self.line("testing"),
+            self.line("--------"),
+        ).strip() == self.output(screen=screen).strip()
+
+    def test_nested_layout_with_multiple_buttons(self):
+        inline_display = Display(type=DisplayType.INLINE_BLOCK)
+
+        screen = Screen().append(
+            Static([
+                Static([Text("Hello world\nay\nsdfsdfdsfdsfsdfsdfdfsdfdf\ntestin")],
+                       styles=Styles(display=inline_display)),
+                Static([Text("Testing")], styles=Styles(display=inline_display)),
+                Text('--------'),
+                Button("First", styles=Styles(display=inline_display)),
+                Button("Second", styles=Styles(display=inline_display)),
+                Static([
+                    Text('just testing'),
+                    Button("multi\nlines", styles=Styles(display=inline_display)),
+                ], styles=Styles(display=inline_display)),
+                Text("This should work")
+            ]),
+            Text("Under the screen directly")
+        )
+
+        assert self.lines_as_string(
+            self.line('Hello world             Testing'),
+            self.line("ay"),
+            self.line("sdfsdfdsfdsfsdfsdfdfsdfd"),
+            self.line("testin"),
+            self.line("--------"),
+            self.line("▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔just testing"),
+            self.line("   First      Second   ▔▔▔▔▔▔▔▔▔▔▔"),
+            self.line("▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁   multi   "),
+            self.line("                          lines   "),
+            self.line("                       ▁▁▁▁▁▁▁▁▁▁▁ "),
+            self.line("This should work                  "),
+            self.line("Under the screen directly")
         ).strip() == self.output(screen=screen).strip()

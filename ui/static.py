@@ -2,6 +2,7 @@ import typing
 import logging
 import random
 from itertools import cycle
+from dataclasses import dataclass
 
 import curses
 
@@ -20,6 +21,24 @@ colors = [
 ]
 
 colors = cycle(colors)
+
+
+@dataclass
+class _LayoutPlaceholder:
+    """
+    A LayoutPlaceholder is used internally to calculate layouts before displaying them, for example
+    a layout consisting of 3 elements, 2 inline and 1 block:
+    --------   --------
+    -------------------
+
+    will be converted into a list of Placeholders:
+        [Placeholder(width=16, height=1), Placeholder(width=19, height=1)]
+
+    which makes dealing with the layout easier.
+    """
+    height: int
+    width: int
+    is_inline: bool
 
 
 class Static(Renderable):
@@ -62,7 +81,34 @@ class Static(Renderable):
             # and the line will increment based in the previous child height.
             if previous_child and previous_child.styles.display.type == DisplayType.INLINE_BLOCK and child.styles.display.type != DisplayType.INLINE_BLOCK:
                 current_column = 0
-                current_line += previous_child.get_height_and_width().height
+                """The previous child height is not used to increment `current_line`, because the current child
+                could be rendered after two inline elements, where the first element is the highest,
+                so if the previous height was used, the current child could overwrite
+                the first child. Example:
+
+                -child1- --------
+                -------- -child2-
+                -------- --------
+                -child1-
+                -----------------
+                --current child--
+                -----------------
+
+                In the example above you can see that child1 is 4 lines, where child2 (rendered next to it)
+                is only 3 lines, if we only increment current_line by 3, we will end up with something like:
+ 
+                -child1- --------
+                -------- -child2-
+                -------- --------
+                xxxxxxx----------
+                --current child--
+                -----------------
+
+                `xxxxxxx` represents what was overwritten.
+
+                Luckily, a layout placeholder object is attached to the child, which has the correct height.
+                """
+                current_line += previous_child._layout_placeholder.height
 
             child_y = current_line
             child_x = current_column
@@ -83,7 +129,7 @@ class Static(Renderable):
             # to allow the next child to also be displayed inline if it supports it.
             # Otherwise, current_line will be incremented by the child height and current column will be reset
             if child.styles.display.type == DisplayType.INLINE_BLOCK:
-                current_column += child.get_height_and_width().width - 1
+                current_column += child.get_height_and_width().width
             else:
                 current_line += child.get_height_and_width().height
                 current_column = 0
@@ -109,37 +155,38 @@ class Static(Renderable):
         )
 
     def get_height_and_width(self) -> Dimensions:
-        # example layout:
-        #   ------ ------
-        #   ---------------
-        # the first line consists of two inline elements
-        # both having the same width (6)
-        # and the second is a single element, width: (15)
-        # the following loop will generate this list
-        # [[True, 12], [False, 15]]
-        cumulative_line_widths = []
+        cumulative_children: typing.List[_LayoutPlaceholder] = []
 
         for child in self.children:
             # if the current child is inline and the previous is also inline
             # increment the previous child width
-            if cumulative_line_widths and \
-                    cumulative_line_widths[len(cumulative_line_widths) - 1][0]\
-                    and child.styles.display.type == DisplayType.INLINE_BLOCK:
-                cumulative_line_widths[len(cumulative_line_widths) - 1][1] += child.get_height_and_width().width
+            if (
+                    cumulative_children and
+                    cumulative_children[len(cumulative_children) - 1].is_inline
+                    and child.styles.display.type == DisplayType.INLINE_BLOCK
+            ):
+                last_placeholder = cumulative_children[len(cumulative_children) - 1]
+                child._layout_placeholder = last_placeholder
+                last_placeholder.width += child.get_height_and_width().width
+                last_placeholder.height = max(child.get_height_and_width().height, last_placeholder.height)
                 continue
 
             # if the child is inline add its width
             # and set the first element to True
             # so the next iteration increases its width
             # instead of appending a new entry
-            cumulative_line_widths.append([
-                    child.styles.display.type == DisplayType.INLINE_BLOCK,
-                    child.get_height_and_width().width
-            ])
+            placeholder = _LayoutPlaceholder(
+                is_inline=child.styles.display.type == DisplayType.INLINE_BLOCK,
+                width=child.get_height_and_width().width,
+                height=child.get_height_and_width().height
+            )
+            cumulative_children.append(placeholder)
+            child._layout_placeholder = placeholder
 
-        logging.debug(f"`{self.id}`: {cumulative_line_widths}")
-        height = sum([child.get_height_and_width().height for child in self.children])
-        width = max(cumulative_line_widths, key=lambda w: w[1])[1]
+        logging.debug(f"`{self.id}`: {cumulative_children}")
+
+        height = sum([child.height for child in cumulative_children])
+        width = max(cumulative_children, key=lambda w: w.width).width
 
         height = max(height, self.styles.get('min_height', height))
         width = max(width, self.styles.get('min_width', width))
