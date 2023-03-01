@@ -9,6 +9,10 @@ from .styles import Styles
 
 
 class Renderable(metaclass=abc.ABCMeta):
+    """
+    Attributes:
+        _applied_styles are the styles that will be rendered, which is up to the parent to decide.
+    """
     id: typing.Optional[str] = None
     position: typing.Optional[Point] = None
     dimensions: typing.Optional[Dimensions] = None
@@ -17,19 +21,20 @@ class Renderable(metaclass=abc.ABCMeta):
     styles: Styles = Styles()
 
     _layout_placeholder: '_LayoutPlaceholder' = None
+    _needs_parent_dimensions: bool = False
 
     @classmethod
     def __subclasshook__(cls, subclass):
         return (
-                hasattr(subclass, 'get_height_and_width') and
-                callable(subclass.get_height_and_width) and
+                hasattr(subclass, 'get_min_height_and_width') and
+                callable(subclass.get_min_height_and_width) and
                 hasattr(subclass, 'render') and
                 callable(subclass.render)
                 or NotImplemented
         )
 
     @abc.abstractmethod
-    def get_height_and_width(self) -> Dimensions:
+    def get_min_height_and_width(self) -> Dimensions:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -37,4 +42,4 @@ class Renderable(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     def __debug_repr__(self):
-        return f"{self.__class__.__name__}(id={self.id}, position={self.position}, dimensions={self.get_height_and_width()})"
+        return f"{self.__class__.__name__}(id={self.id}, position={self.position}, dimensions={self.get_min_height_and_width()})"

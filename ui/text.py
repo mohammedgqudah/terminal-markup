@@ -18,7 +18,7 @@ class Text(Renderable):
         self.styles = styles or self.styles
         self._addstr_args = []
 
-    def get_height_and_width(self) -> Dimensions:
+    def get_min_height_and_width(self) -> Dimensions:
         y, x = get_text_height_and_width(self.text)
 
         # -1 because the extra space is hidden and will not be part of the final rendered text.
@@ -28,8 +28,8 @@ class Text(Renderable):
 
     def render(self, point: Point):
         self.position = point
-        _, parent_width = self.parent.get_height_and_width()
-        lines, _ = self.get_height_and_width()
+        _, parent_width = self.parent.get_min_height_and_width()
+        lines, _ = self.get_min_height_and_width()
 
         for idx, line in enumerate(self.text.split('\n')):
             # sometimes adding an extra space is not necessary

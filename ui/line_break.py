@@ -6,7 +6,7 @@ class LineBreak(Renderable):
     def __init__(self, lines: int = 1):
         self.lines = lines
 
-    def get_height_and_width(self) -> Dimensions:
+    def get_min_height_and_width(self) -> Dimensions:
         return Dimensions(self.lines, 0)
 
     def render(self, point: Point):

@@ -1,3 +1,4 @@
+import copy
 import typing
 from enum import Enum
 from dataclasses import dataclass
@@ -49,3 +50,6 @@ class Styles:
                 setattr(self, key, value)
 
         return self
+
+    def clone(self) -> 'Styles':
+        return copy.deepcopy(self)

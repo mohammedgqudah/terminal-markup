@@ -61,7 +61,7 @@ class Static(Renderable):
         self.parent.window.refresh()
 
         self.position = position
-        self.window = curses.newwin(*self.get_height_and_width(), *self.position)
+        self.window = curses.newwin(*self.get_min_height_and_width(), *self.position)
 
         logging.debug(f"window created for {self.__debug_repr__()}")
 
@@ -129,9 +129,9 @@ class Static(Renderable):
             # to allow the next child to also be displayed inline if it supports it.
             # Otherwise, current_line will be incremented by the child height and current column will be reset
             if child.styles.display.type == DisplayType.INLINE_BLOCK:
-                current_column += child.get_height_and_width().width
+                current_column += child.get_min_height_and_width().width
             else:
-                current_line += child.get_height_and_width().height
+                current_line += child.get_min_height_and_width().height
                 current_column = 0
 
             child.render(Point(child_y, child_x))
@@ -142,7 +142,7 @@ class Static(Renderable):
         self.window.refresh()
 
     def debug_dimensions(self):
-        height, width = self.get_height_and_width()
+        height, width = self.get_min_height_and_width()
         label = f"{width}x{height}"
         if (width - 1) - len(label) < 0:
             return
@@ -154,21 +154,23 @@ class Static(Renderable):
             curses.A_BOLD | curses.A_UNDERLINE
         )
 
-    def get_height_and_width(self) -> Dimensions:
+    def get_min_height_and_width(self) -> Dimensions:
         cumulative_children: typing.List[_LayoutPlaceholder] = []
 
         for child in self.children:
+            child._applied_styles = child.styles.clone()
+
             # if the current child is inline and the previous is also inline
             # increment the previous child width
             if (
                     cumulative_children and
-                    cumulative_children[len(cumulative_children) - 1].is_inline
-                    and child.styles.display.type == DisplayType.INLINE_BLOCK
+                    cumulative_children[len(cumulative_children) - 1].is_inline and
+                    child.styles.display.type == DisplayType.INLINE_BLOCK
             ):
                 last_placeholder = cumulative_children[len(cumulative_children) - 1]
                 child._layout_placeholder = last_placeholder
-                last_placeholder.width += child.get_height_and_width().width
-                last_placeholder.height = max(child.get_height_and_width().height, last_placeholder.height)
+                last_placeholder.width += child.get_min_height_and_width().width
+                last_placeholder.height = max(child.get_min_height_and_width().height, last_placeholder.height)
                 continue
 
             # if the child is inline add its width
@@ -177,8 +179,8 @@ class Static(Renderable):
             # instead of appending a new entry
             placeholder = _LayoutPlaceholder(
                 is_inline=child.styles.display.type == DisplayType.INLINE_BLOCK,
-                width=child.get_height_and_width().width,
-                height=child.get_height_and_width().height
+                width=child.get_min_height_and_width().width,
+                height=child.get_min_height_and_width().height
             )
             cumulative_children.append(placeholder)
             child._layout_placeholder = placeholder

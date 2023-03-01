@@ -16,7 +16,7 @@ class Screen:
         for child in self.children:
             child.parent = self
             child.render(Point(last_y, 0))
-            last_y += child.get_height_and_width().height
+            last_y += child.get_min_height_and_width().height
 
         self.window.refresh()
 
@@ -24,6 +24,9 @@ class Screen:
         y, x = self.window.getmaxyx()
 
         return Dimensions(y + 1, x + 1)
+
+    def get_min_height_and_width(self) -> Dimensions:
+        return self.get_height_and_width()
 
     def append(self, *items):
         for item in items:
