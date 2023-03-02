@@ -93,41 +93,14 @@ class Static(Renderable):
 
         for child in self.children:
             # if the previous child was displayed inline, current child can be rendered right next to it
-            # only if it's styled to be rendered inline, otherwise, the current column will be reset
-            # and the line will increment based in the previous child height.
+            # only if it's within the same region, otherwise, the current column will reset
+            # and the line will increment based in the previous region height.
             if (
                     previous_child and
                     previous_child._region.is_inline and
                     previous_child._region != child._region
             ):
                 current_column = 0
-                """The previous child height is not used to increment `current_line`, because the current child
-                could be rendered after two inline elements, where the first element is the highest,
-                so if the previous height was used, the current child could overwrite
-                the first child. Example:
-
-                -child1- --------
-                -------- -child2-
-                -------- --------
-                -child1-
-                -----------------
-                --current child--
-                -----------------
-
-                In the example above you can see that child1 is 4 lines, where child2 (rendered next to it)
-                is only 3 lines, if we only increment current_line by 3, we will end up with something like:
- 
-                -child1- --------
-                -------- -child2-
-                -------- --------
-                xxxxxxx----------
-                --current child--
-                -----------------
-
-                `xxxxxxx` represents what was overwritten.
-
-                Luckily, a layout placeholder object is attached to the child, which has the correct height.
-                """
                 current_line += previous_child._region.height
 
             child_y = current_line
@@ -142,9 +115,9 @@ class Static(Renderable):
                 child_y += child.parent.position.y
                 child_x += child.parent.position.x
 
-            # if the current child is styled for inline rendering, current column will be incremented
+            # if the current child is styled for inline rendering, current column will increase
             # to allow the next child to also be displayed inline if it supports it.
-            # Otherwise, current_line will be incremented by the child height and current column will be reset
+            # Otherwise, current_line will increase by the child height and current column will reset
             if child.styles.display.type == DisplayType.INLINE_BLOCK:
                 current_column += child.get_min_height_and_width().width
             else:
