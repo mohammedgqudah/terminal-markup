@@ -25,6 +25,3 @@ A markup language to build terminal interfaces, built on top of curses.
   - [ ] button
 - [ ] detect mouse input
   - [ ] detect which component was clicked based on cords (focus)
-
-## Known Issues
-- `Text` removes the last character
