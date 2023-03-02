@@ -11,7 +11,6 @@ from .styles import Styles
 class Renderable(metaclass=abc.ABCMeta):
     """
     Attributes:
-        _applied_styles are the styles that will be rendered, which is up to the parent to decide.
     """
     id: typing.Optional[str] = None
     position: typing.Optional[Point] = None
