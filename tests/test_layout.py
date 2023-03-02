@@ -4,6 +4,7 @@ from ui.styles import Styles, Display, Padding, DisplayType
 from ui.static import Static
 from ui.text import Text
 from ui.button import Button
+from ui.geometry import Dimensions
 from ui.line_break import LineBreak
 
 
@@ -132,7 +133,7 @@ class TestUI(TerminalOutput):
             self.line("--------")
         ).strip() == self.output(screen=screen).strip()
 
-    def test_the_next_block_element_is_rendered_correctly_if_the_previous_is_inline(self):
+    def test_a_block_element_is_rendered_in_a_new_line_even_if_the_previous_is_inline(self):
         inline_display = Display(type=DisplayType.INLINE_BLOCK)
 
         screen = Screen().append(
@@ -185,4 +186,21 @@ class TestUI(TerminalOutput):
             self.line("                       ▁▁▁▁▁▁▁▁▁▁▁ "),
             self.line("This should work                  "),
             self.line("Under the screen directly")
+        ).strip() == self.output(screen=screen).strip()
+
+    def test_an_inline_element_is_rendered_in_a_newline_if_the_parent_width_is_not_enough(self):
+        self.set_screen_size(Dimensions(height=400, width=20))
+
+        inline_display = Display(type=DisplayType.INLINE_BLOCK)
+
+        screen = Screen().append(
+            Static([
+                Text("x0123456789", styles=Styles(display=inline_display)),
+                Text("9876543210", styles=Styles(display=inline_display)),
+            ], id='rightnow')
+        )
+
+        assert self.lines_as_string(
+            self.line('x0123456789'),
+            self.line('9876543210'),
         ).strip() == self.output(screen=screen).strip()

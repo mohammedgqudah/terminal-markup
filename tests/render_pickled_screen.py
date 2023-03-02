@@ -12,14 +12,19 @@ import curses
 import codecs
 
 from ui.screen import Screen
-
+from tests import config
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--pickle", required=True)
+parser.add_argument("--terminal_lines", required=True)
+parser.add_argument("--terminal_cols", required=True)
 
 args = parser.parse_args()
 
 screen: Screen = pickle.loads(codecs.decode(args.pickle.encode(), "base64"))
+
+config.terminal['terminal_lines'] = int(args.terminal_lines)
+config.terminal['terminal_cols'] = int(args.terminal_cols)
 
 
 def main(std_scr):

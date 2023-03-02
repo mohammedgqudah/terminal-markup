@@ -41,6 +41,7 @@ class _LayoutPlaceholder:
     is_inline: bool
 
 
+
 class Static(Renderable):
     """
     A Static is a container that can render a list of renderable children
@@ -56,6 +57,10 @@ class Static(Renderable):
         self.id = id
         self.window = None
         self.styles = styles or self.styles
+
+        for child in self.children:
+            child.screen = self.screen
+            child.parent = self
 
     def render(self, position: Point):
         self.parent.window.refresh()
@@ -79,7 +84,11 @@ class Static(Renderable):
             # if the previous child was displayed inline, current child can be rendered right next to it
             # only if it's styled to be rendered inline, otherwise, the current column will be reset
             # and the line will increment based in the previous child height.
-            if previous_child and previous_child.styles.display.type == DisplayType.INLINE_BLOCK and child.styles.display.type != DisplayType.INLINE_BLOCK:
+            if (
+                    previous_child and
+                    previous_child._layout_placeholder.is_inline and
+                    previous_child._layout_placeholder != child._layout_placeholder
+            ):
                 current_column = 0
                 """The previous child height is not used to increment `current_line`, because the current child
                 could be rendered after two inline elements, where the first element is the highest,
@@ -113,9 +122,6 @@ class Static(Renderable):
             child_y = current_line
             child_x = current_column
             logging.debug(f"\trendering child {child.__debug_repr__()} at Y={child_y}")
-
-            child.screen = self.screen
-            child.parent = self
 
             if type(child) is Static:
                 # Static windows position is relevant to the main screen and not the parent
@@ -154,6 +160,9 @@ class Static(Renderable):
             curses.A_BOLD | curses.A_UNDERLINE
         )
 
+    def get_max_height_and_width(self) -> Dimensions:
+        return self.parent.get_max_height_and_width()
+
     def get_min_height_and_width(self) -> Dimensions:
         cumulative_children: typing.List[_LayoutPlaceholder] = []
 
@@ -164,10 +173,12 @@ class Static(Renderable):
             # increment the previous child width
             if (
                     cumulative_children and
-                    cumulative_children[len(cumulative_children) - 1].is_inline and
-                    child.styles.display.type == DisplayType.INLINE_BLOCK
+                    cumulative_children[-1].is_inline and
+                    child.styles.display.type == DisplayType.INLINE_BLOCK and
+                    (child.parent.get_max_height_and_width().width - cumulative_children[-1].width)
+                    >= child.get_min_height_and_width().width
             ):
-                last_placeholder = cumulative_children[len(cumulative_children) - 1]
+                last_placeholder = cumulative_children[-1]
                 child._layout_placeholder = last_placeholder
                 last_placeholder.width += child.get_min_height_and_width().width
                 last_placeholder.height = max(child.get_min_height_and_width().height, last_placeholder.height)
