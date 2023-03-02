@@ -4,6 +4,7 @@ import sys
 
 import pyte
 import pexpect
+from wcwidth import wcswidth
 
 from ui.screen import Screen
 from ui.geometry import Dimensions
@@ -39,7 +40,7 @@ class TerminalOutput:
         return self._screen.display
 
     def line(self, text):
-        return f"{text}{' ' * (config.terminal_width - len(text))}"
+        return f"{text}{' ' * (config.terminal_width - wcswidth(text))}"
 
     def lines(self, number):
         return self.lines_as_string(*[self.line("") for i in range(0, number)])

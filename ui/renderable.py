@@ -2,7 +2,7 @@ import abc
 import typing
 if typing.TYPE_CHECKING:
     from ui.screen import Screen
-    from ui.static import Static, _LayoutPlaceholder
+    from ui.static import Static, _Region
 
 from .geometry import Dimensions, Point
 from .styles import Styles
@@ -20,7 +20,7 @@ class Renderable(metaclass=abc.ABCMeta):
     parent: typing.Optional[typing.Union['Screen', 'Static']] = None
     styles: Styles = Styles()
 
-    _layout_placeholder: '_LayoutPlaceholder' = None
+    _region: '_Region' = None
     _needs_parent_dimensions: bool = False
 
     @classmethod
@@ -36,6 +36,9 @@ class Renderable(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_min_height_and_width(self) -> Dimensions:
         raise NotImplementedError
+
+    def get_max_height_and_width(self):
+        return self.get_min_height_and_width()
 
     @abc.abstractmethod
     def render(self, position: Point):

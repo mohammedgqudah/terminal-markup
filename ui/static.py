@@ -1,6 +1,5 @@
 import typing
 import logging
-import random
 from itertools import cycle
 from dataclasses import dataclass
 
@@ -24,22 +23,34 @@ colors = cycle(colors)
 
 
 @dataclass
-class _LayoutPlaceholder:
+class _Region:
     """
-    A LayoutPlaceholder is used internally to calculate layouts before displaying them, for example
+    A Region is used internally to calculate layouts before displaying them, for example
     a layout consisting of 3 elements, 2 inline and 1 block:
     --------   --------
     -------------------
 
-    will be converted into a list of Placeholders:
-        [Placeholder(width=16, height=1), Placeholder(width=19, height=1)]
+    will be converted into a list of Regions:
+        [Region(width=16, height=1, is_inline=True), Region(width=19, height=1, is_inline=False)]
 
     which makes dealing with the layout easier.
     """
     height: int
     width: int
     is_inline: bool
+    parent: Renderable
 
+    def available_area_width(self):
+        return self.parent.get_max_height_and_width().width - self.width
+
+    def is_available(self, renderable: Renderable):
+        return self.is_inline and self.available_area_width() >= renderable.get_min_height_and_width().width
+
+    def append(self, renderable: Renderable):
+        renderable._region = self
+
+        self.width += renderable.get_min_height_and_width().width
+        self.height = max(renderable.get_min_height_and_width().height, self.height)
 
 
 class Static(Renderable):
@@ -86,8 +97,8 @@ class Static(Renderable):
             # and the line will increment based in the previous child height.
             if (
                     previous_child and
-                    previous_child._layout_placeholder.is_inline and
-                    previous_child._layout_placeholder != child._layout_placeholder
+                    previous_child._region.is_inline and
+                    previous_child._region != child._region
             ):
                 current_column = 0
                 """The previous child height is not used to increment `current_line`, because the current child
@@ -117,7 +128,7 @@ class Static(Renderable):
 
                 Luckily, a layout placeholder object is attached to the child, which has the correct height.
                 """
-                current_line += previous_child._layout_placeholder.height
+                current_line += previous_child._region.height
 
             child_y = current_line
             child_x = current_column
@@ -164,42 +175,27 @@ class Static(Renderable):
         return self.parent.get_max_height_and_width()
 
     def get_min_height_and_width(self) -> Dimensions:
-        cumulative_children: typing.List[_LayoutPlaceholder] = []
+        regions: typing.List[_Region] = []
 
         for child in self.children:
-            child._applied_styles = child.styles.clone()
-
-            # if the current child is inline and the previous is also inline
-            # increment the previous child width
-            if (
-                    cumulative_children and
-                    cumulative_children[-1].is_inline and
-                    child.styles.display.type == DisplayType.INLINE_BLOCK and
-                    (child.parent.get_max_height_and_width().width - cumulative_children[-1].width)
-                    >= child.get_min_height_and_width().width
-            ):
-                last_placeholder = cumulative_children[-1]
-                child._layout_placeholder = last_placeholder
-                last_placeholder.width += child.get_min_height_and_width().width
-                last_placeholder.height = max(child.get_min_height_and_width().height, last_placeholder.height)
+            if child.styles.display.type == DisplayType.INLINE_BLOCK and regions and regions[-1].is_available(child):
+                previous_region = regions[-1]
+                previous_region.append(child)
                 continue
 
-            # if the child is inline add its width
-            # and set the first element to True
-            # so the next iteration increases its width
-            # instead of appending a new entry
-            placeholder = _LayoutPlaceholder(
+            # if the child couldn't join the previous region
+            # create a new one.
+            new_region = _Region(
+                parent=self,
                 is_inline=child.styles.display.type == DisplayType.INLINE_BLOCK,
                 width=child.get_min_height_and_width().width,
                 height=child.get_min_height_and_width().height
             )
-            cumulative_children.append(placeholder)
-            child._layout_placeholder = placeholder
+            regions.append(new_region)
+            child._region = new_region
 
-        logging.debug(f"`{self.id}`: {cumulative_children}")
-
-        height = sum([child.height for child in cumulative_children])
-        width = max(cumulative_children, key=lambda w: w.width).width
+        height = sum([child.height for child in regions])
+        width = max(regions, key=lambda w: w.width).width
 
         height = max(height, self.styles.get('min_height', height))
         width = max(width, self.styles.get('min_width', width))
