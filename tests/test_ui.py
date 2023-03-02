@@ -137,7 +137,7 @@ class TestUI(TerminalOutput):
 
         screen = Screen().append(
             Static([
-                Static([Text("Hello world\nline2\na-very-long-string-yyyyy\ntesting")],
+                Static([Text("Hello world\nline2\na-very-long-string-12345\ntesting")],
                        styles=Styles(display=inline_display), id='one'),
                 Static([Text("Testing")], styles=Styles(display=inline_display), id='two'),
                 Text('--------')
@@ -145,9 +145,9 @@ class TestUI(TerminalOutput):
         )
 
         assert self.lines_as_string(
-            self.line('Hello world            Testing'),
+            self.line('Hello world             Testing'),
             self.line("line2"),
-            self.line("a-very-long-string-yyyy"),
+            self.line("a-very-long-string-12345"),
             self.line("testing"),
             self.line("--------"),
         ).strip() == self.output(screen=screen).strip()
@@ -157,7 +157,7 @@ class TestUI(TerminalOutput):
 
         screen = Screen().append(
             Static([
-                Static([Text("Hello world\nay\nsdfsdfdsfdsfsdfsdfdfsdfdf\ntestin")],
+                Static([Text("Hello world\nay\ndummy text to make this line longer\ntestin")],
                        styles=Styles(display=inline_display)),
                 Static([Text("Testing")], styles=Styles(display=inline_display)),
                 Text('--------'),
@@ -173,9 +173,9 @@ class TestUI(TerminalOutput):
         )
 
         assert self.lines_as_string(
-            self.line('Hello world             Testing'),
+            self.line('Hello world                        Testing'),
             self.line("ay"),
-            self.line("sdfsdfdsfdsfsdfsdfdfsdfd"),
+            self.line("dummy text to make this line longer"),
             self.line("testin"),
             self.line("--------"),
             self.line("▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔just testing"),

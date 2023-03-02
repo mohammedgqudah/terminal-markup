@@ -24,7 +24,7 @@ class TestText(TerminalOutput):
         assert self.lines_as_string(
             self.line("Hello world"),
             self.line('line')
-        ) == self.output(screen=screen).strip()
+        ).strip() == self.output(screen=screen).strip()
         assert static.get_min_height_and_width().width == 11
         assert static.get_min_height_and_width().height == 2
 
@@ -35,6 +35,6 @@ class TestText(TerminalOutput):
         assert self.lines_as_string(
             self.line("Hello world"),
             self.line('Hello world')
-        ) == self.output(screen=screen).strip()
+        ).strip() == self.output(screen=screen).strip()
         assert static.get_min_height_and_width().width == 11
         assert static.get_min_height_and_width().height == 2

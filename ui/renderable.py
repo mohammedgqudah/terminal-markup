@@ -41,5 +41,8 @@ class Renderable(metaclass=abc.ABCMeta):
     def render(self, position: Point):
         raise NotImplementedError
 
+    def post_calculating_parent_dimensions_hook(self):
+        pass
+
     def __debug_repr__(self):
         return f"{self.__class__.__name__}(id={self.id}, position={self.position}, dimensions={self.get_min_height_and_width()})"

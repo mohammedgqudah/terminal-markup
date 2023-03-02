@@ -14,39 +14,38 @@ class Text(Renderable):
         because the space isn't meant to be rendered.
     """
     def __init__(self, text: str, styles: Styles = None):
-        self.text = text + " "
+        self.text = text
+        self.dimensions = self.get_min_height_and_width()
         self.styles = styles or self.styles
         self._addstr_args = []
 
     def get_min_height_and_width(self) -> Dimensions:
         y, x = get_text_height_and_width(self.text)
 
-        # -1 because the extra space is hidden and will not be part of the final rendered text.
-        # TODO: only if it's required, but the problem is that the parent will calculate the width based on the children.
-
-        return Dimensions(y, x - 1)
+        return Dimensions(y, x)
 
     def render(self, point: Point):
         self.position = point
+        _text = self.text
         _, parent_width = self.parent.get_min_height_and_width()
-        lines, _ = self.get_min_height_and_width()
+        height, _ = self.get_min_height_and_width()
+        lines = _text.split("\n")
 
-        for idx, line in enumerate(self.text.split('\n')):
-            # sometimes adding an extra space is not necessary
-            # because the parent window is bigger and curses won't
-            # advance the cursor, so if it's the last line and the parent
-            # is bigger, remove the hidden space.
-            if idx == (lines - 1) and wcswidth(line) < parent_width:
-                line = line[:-1]
+        # if wcswidth(lines[-1]) == parent_width:
+        #     lines[-1] = lines[-1] + " "
 
+        for idx, line in enumerate(lines):
             try:
                 # `addstr` by defaults advances the cursor to the next line,
-                # to avoid this, an extra space was added, which is meant to not be rendered
+                # to avoid this, ~~an extra space was added~~, which is meant to not be rendered
                 # because curses will return ERR and the cursor position will not change then.
                 # it is not the best solution, but that's because the python wrapper doesn't export `addchstr`
                 self.parent.window.addstr(point.y + idx, point.x, line, *self._addstr_args)
             except:
                 pass
+
+    def post_calculating_parent_dimensions_hook(self):
+        pass
 
     def __repr__(self):
         return f"{__class__.__name__}(text={self.text})"
