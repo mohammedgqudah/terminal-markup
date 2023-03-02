@@ -29,7 +29,7 @@ class Screen:
     def get_height_and_width(self) -> Dimensions:
         if "PYTEST_CURRENT_TEST" in os.environ:
             from tests import config
-            columns, lines = config.terminal['terminal_cols'], config.terminal['terminal_lines']
+            columns, lines = config.terminal_width, config.terminal_height
         else:
             columns, lines = os.get_terminal_size()
 

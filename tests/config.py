@@ -1,4 +1,2 @@
-terminal = {
-    'terminal_cols': 100,
-    'terminal_lines': 100
-}
+terminal_height = 100
+terminal_width = 100

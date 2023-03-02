@@ -15,18 +15,21 @@ class TerminalOutput:
     _stream = None
 
     def set_screen_size(self, dimensions: Dimensions):
-        config.terminal['terminal_lines'] = dimensions.height
-        config.terminal['terminal_cols'] = dimensions.width
+        config.terminal_height = dimensions.height
+        config.terminal_width = dimensions.width
 
     def output(self, screen: Screen, as_string: bool = True) -> str:
-        self._screen = pyte.Screen(config.terminal['terminal_cols'], config.terminal['terminal_lines'])
+        self._screen = pyte.Screen(config.terminal_width, config.terminal_height)
         self._stream = pyte.Stream(self._screen)
 
         # TEMP
         script_location = '/Users/qudah/Desktop/personal/terminal-markup/tests/render_pickled_screen.py'
 
         pickled = codecs.encode(pickle.dumps(screen), "base64").decode()
-        curses_output = pexpect.run(f'{sys.executable} {script_location} -p="{pickled}" --terminal_cols={config.terminal["terminal_cols"]} --terminal_lines={config.terminal["terminal_lines"]}')
+        curses_output = pexpect.run(
+            f'{sys.executable} {script_location} -p="{pickled}" '
+            f'--terminal_width={config.terminal_width} --terminal_height={config.terminal_height}'
+        )
 
         self._stream.feed(curses_output.decode('UTF-8'))
 
@@ -36,7 +39,7 @@ class TerminalOutput:
         return self._screen.display
 
     def line(self, text):
-        return f"{text}{' ' * (config.terminal['terminal_cols'] - len(text))}"
+        return f"{text}{' ' * (config.terminal_width - len(text))}"
 
     def lines(self, number):
         return self.lines_as_string(*[self.line("") for i in range(0, number)])
