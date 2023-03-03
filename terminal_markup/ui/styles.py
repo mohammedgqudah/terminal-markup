@@ -1,3 +1,4 @@
+import copy
 import typing
 from enum import Enum
 from dataclasses import dataclass
@@ -5,8 +6,8 @@ from dataclasses import dataclass
 
 class DisplayType(Enum):
     FLEX = 1
-    INLINE = 2
-    INLINE_BLOCK = 3
+    INLINE_BLOCK = 2
+    BLOCK = 3
 
 
 class OverflowType(Enum):
@@ -29,13 +30,26 @@ class Padding:
 
 @dataclass
 class Styles:
-    display: Display = Display(type=DisplayType.INLINE_BLOCK)
+    display: Display = Display(type=DisplayType.BLOCK)
     max_height: typing.Optional[int] = None
     min_height: typing.Optional[int] = None
     max_width: typing.Optional[int] = None
     min_width: typing.Optional[int] = None
     overflow: OverflowType = OverflowType.SCROLL
-    padding: Padding = Padding()
+    padding: typing.Optional[Padding] = None
 
     def get(self, key, default=None):
         return getattr(self, key) or default
+
+    def merge(self, styles: typing.Optional['Styles'] = None):
+        if not styles:
+            return self
+
+        for key, value in styles.__dict__.items():
+            if value:
+                setattr(self, key, value)
+
+        return self
+
+    def clone(self) -> 'Styles':
+        return copy.deepcopy(self)

@@ -1,4 +1,4 @@
-from ui.geometry import ensure_value_in_range, get_text_height_and_width
+from terminal_markup.ui.geometry import ensure_value_in_range, get_text_height_and_width
 
 
 def test_ensure_value_in_range():

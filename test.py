@@ -3,8 +3,9 @@ import curses
 from ui.screen import Screen
 from ui.static import Static
 from ui.text import Text
-from ui.styles import Styles, Padding
+from ui.styles import Styles, Padding, DisplayType, Display
 from ui.button import Button
+from ui.line_break import LineBreak
 
 import argparse
 import logging
@@ -24,25 +25,29 @@ def main(std_scr):
     screen = Screen(std_scr).append(
         Static([
             Text("1"),
-            Text("2"),
+            Text("2", styles=Styles(display=Display(type=DisplayType.INLINE_BLOCK))),
             Button(
                 "click me! ↗",
-                # styles=Styles(padding=Padding(top=0, bottom=0, right=1, left=1))
+                styles=Styles(**{**Button.styles.__dict__, 'display': Display(type=DisplayType.INLINE_BLOCK)})
             ),
+            Text("3", styles=Styles(display=Display(type=DisplayType.INLINE_BLOCK))),
+            LineBreak(0),
             Static([
-                Text("Ayo")
-            ]),
+                Text("Ayo...")
+            ],
+                styles=Styles(display=Display(type=DisplayType.INLINE_BLOCK))
+            ),
             Static([
                 Text("\tI'm nested"),
                 Static([
                     Text("\t\tmore nesting\ntest"),
                     Static([
-                        Text("\t\t\tAAAH!"),
-                        Text("\t\t\tAY!"),
+                        Text("AAAH!"),
+                        Text("AY!"),
                     ])
                 ], styles=Styles(min_width=40))
-            ], id='second-static', styles=Styles(min_height=20, min_width=60))
-        ], id='main-static', styles=Styles(min_height=20, min_width=80))
+            ], id='second-static', styles=Styles(min_height=20, min_width=60, display=Display(type=DisplayType.INLINE_BLOCK)))
+        ], id='main-static', styles=Styles(min_height=20))
     )
 
     screen.render()

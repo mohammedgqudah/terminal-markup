@@ -16,7 +16,7 @@ A markup language to build terminal interfaces, built on top of curses.
   - [ ] max width
   - [x] min width
   - [x] min height
-  - [ ] display: inline
+  - [x] display: inline-block
   - [ ] units (%, cell, line)
   - [ ] CSS parser
 - [ ] components
