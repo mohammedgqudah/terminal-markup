@@ -24,7 +24,6 @@ class TerminalOutput:
         self._screen = pyte.Screen(config.terminal_width, config.terminal_height)
         self._stream = pyte.Stream(self._screen)
 
-        # TEMP
         script_location = root_dir.joinpath('tests', 'render_pickled_screen.py')
 
         pickled = codecs.encode(pickle.dumps(screen), "base64").decode()
