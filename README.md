@@ -5,7 +5,7 @@ A markup language to build terminal interfaces, built on top of curses.
 
 ## TODO
 - [x] debug mode
-- [ ] unit/feature testing by dumping curses stdout
+- [x] unit/feature testing by dumping curses stdout
 - [ ] scrolling
   - [ ] case: parent static max height is 50, child static uses more than 50 lines
 - [ ] layout/styles
