@@ -1,10 +1,8 @@
 from .terminal_output import TerminalOutput
-from ui.screen import Screen
-from ui.styles import Styles, Display, Padding, DisplayType
-from ui.static import Static
-from ui.text import Text
-from ui.button import Button
-from ui.line_break import LineBreak
+from terminal_markup.ui.screen import Screen
+from terminal_markup.ui.static import Static
+from terminal_markup.ui.text import Text
+from terminal_markup.ui.button import Button
 
 
 class TestText(TerminalOutput):

@@ -11,7 +11,7 @@ import pickle
 import curses
 import codecs
 
-from ui.screen import Screen
+from terminal_markup.ui.screen import Screen
 from tests import config
 
 parser = argparse.ArgumentParser()

@@ -1,8 +1,8 @@
 import abc
 import typing
 if typing.TYPE_CHECKING:
-    from ui.screen import Screen
-    from ui.static import Static, _Region
+    from terminal_markup.ui.screen import Screen
+    from terminal_markup.ui.static import Static, _Region
 
 from .geometry import Dimensions, Point
 from .styles import Styles

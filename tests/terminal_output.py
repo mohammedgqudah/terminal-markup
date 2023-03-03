@@ -6,9 +6,10 @@ import pyte
 import pexpect
 from wcwidth import wcswidth
 
-from ui.screen import Screen
-from ui.geometry import Dimensions
+from terminal_markup.ui.screen import Screen
+from terminal_markup.ui.geometry import Dimensions
 from . import config
+from terminal_markup.config import root_dir
 
 
 class TerminalOutput:
@@ -24,7 +25,7 @@ class TerminalOutput:
         self._stream = pyte.Stream(self._screen)
 
         # TEMP
-        script_location = '/Users/qudah/Desktop/personal/terminal-markup/tests/render_pickled_screen.py'
+        script_location = root_dir.joinpath('tests', 'render_pickled_screen.py')
 
         pickled = codecs.encode(pickle.dumps(screen), "base64").decode()
         curses_output = pexpect.run(
